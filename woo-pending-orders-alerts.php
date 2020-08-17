@@ -3,7 +3,7 @@
 Plugin Name: WPCARE: WooCommerce Pending Orders
 Plugin URI: https://wpcare.gr
 Description: Sends an e-mail alert when pending orders exist. The e-mail is sent to "admin_email" every morning after 5:00 am. You can change the e-mail from General Options. Just activate the plugin and it works.
-Version: 1.1.0
+Version: 1.1.1
 Author: WordPress Care
 Author URI: https://wpcare.gr
 License: GPL3
@@ -98,7 +98,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // exit if accessed directly
 		$customer_orders = $my_query->posts;
 		$wpcorders_woo_pending_orders = 0;
 		$subject = "Υπάρχουν παραγγελίες σε εκκρεμότητα";
-		$email_to = get_option('admin_email');
+		//$email_to = get_option('admin_email');
+		//https://stackoverflow.com/questions/57612532/how-to-get-email-recipients-from-new-order-email-in-woocommerce
+		$email_to = WC()->mailer()->get_emails()['WC_Email_New_Order']->recipient;
 		//$name_of_user_nice = get_option( 'wpcorders_manager_nicename' );
 		$orders_included = "";
 
