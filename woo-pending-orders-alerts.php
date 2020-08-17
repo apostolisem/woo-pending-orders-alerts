@@ -3,7 +3,7 @@
 Plugin Name: WPCARE: WooCommerce Pending Orders
 Plugin URI: https://wpcare.gr
 Description: Sends an e-mail alert when pending orders exist. The e-mail is sent to "admin_email" every morning after 5:00 am. You can change the e-mail from General Options. Just activate the plugin and it works.
-Version: 1.0.2
+Version: 1.0.3
 Author: WordPress Care
 Author URI: https://wpcare.gr
 License: GPL3
@@ -127,13 +127,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // exit if accessed directly
 				$email_message .= "<td style='padding:7px;'>".$order_id."</td>";
 				$email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&action=edit' style='text-decoration:none; color: blue;' target='_blank'>".$client_name ."</a></td>";
 				$email_message .= "<td>".date("d-m-Y",strtotime($order->get_date_created()))."</td>";
-				$email_message .= "
-				<td>
-					<a href='".get_admin_url()."post.php?post=".$order_id."&action=edit&complete_order=".$order_id."&message=1' target='_blank'><img src='".$complete_order_button."' ".$button_style." /></a>
-					<a href='".get_admin_url()."post.php?post=".$order_id."&action=edit&cancel_order=".$order_id."&message=1' target='_blank'><img src='".$cancel_order_button."' ".$button_style." /></a>
-					<a href='".get_admin_url()."post.php?post=".$order_id."&action=edit' target='_blank'><img src='".$order_info_button."' ".$button_style." /></a>
-				</td>
-				";
+$email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&action=edit&complete_order=".$order_id."&message=1' target='_blank'><img src='".$complete_order_button."' ".$button_style." /></a> <a href='".get_admin_url()."post.php?post=".$order_id."&action=edit&cancel_order=".$order_id."&message=1' target='_blank'><img src='".$cancel_order_button."' ".$button_style." /></a> <a href='".get_admin_url()."post.php?post=".$order_id."&action=edit' target='_blank'><img src='".$order_info_button."' ".$button_style." /></a></td>";
 				$email_message .= "</tr>";
 			}
 		}
