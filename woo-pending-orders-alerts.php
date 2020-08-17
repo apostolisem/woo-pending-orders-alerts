@@ -3,7 +3,7 @@
 Plugin Name: WPCARE: WooCommerce Pending Orders
 Plugin URI: https://wpcare.gr
 Description: Sends an e-mail alert when pending orders exist. The e-mail is sent to "admin_email" every morning after 5:00 am. You can change the e-mail from General Options. Just activate the plugin and it works.
-Version: 1.0.0
+Version: 1.0.1
 Author: WordPress Care
 Author URI: https://wpcare.gr
 License: GPL3
@@ -58,12 +58,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // exit if accessed directly
 	// 1.13
 	register_activation_hook( __FILE__, 'wpcorders_activation_hook' );
 
-	// 1.18
-	if ( ! wp_next_scheduled( 'wpcorders_get_website_options' ) ) {
-		wp_schedule_event( time(), 'hourly', 'wpcorders_get_website_options' );
-	}
-	add_action( 'wpcorders_get_website_options', 'wpcorders_get_website_options' );
-
 
 // mark: 2. SHORTCODES
 
@@ -105,10 +99,11 @@ if ( ! defined( 'ABSPATH' ) ) exit; // exit if accessed directly
 		$wpcorders_woo_pending_orders = 0;
 		$subject = "Υπάρχουν παραγγελίες σε εκκρεμότητα";
 		$email_to = get_option('admin_email');
-		$name_of_user_nice = get_option( 'wpcorders_manager_nicename' );
+		//$name_of_user_nice = get_option( 'wpcorders_manager_nicename' );
 		$orders_included = "";
 
-		$email_message  = "Γεια σου ".$name_of_user_nice.",
+		//$email_message  = "Γεια σου ".$name_of_user_nice.",
+		$email_message  = "Γεια σου,
 
 		Αυτή είναι μια υπενθύμιση για τις ανοικτές παραγγελίες του καταστήματος σου:
 
@@ -151,7 +146,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // exit if accessed directly
 	// 5.6
 	function wpcorders_deactivation_hook() {
 		wp_clear_scheduled_hook('wpcorders_woo_pending_orders');
-		wp_clear_scheduled_hook('wpcorders_get_website_options');
 		wpcorders_write_log('The WordPress Care Plugin was succesfully Deactivated.');
 	}
 
@@ -217,44 +211,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // exit if accessed directly
 	 	$Data = date("Y-m-d H:i:s")." - ".$log."\r\n";
 	 	fwrite($Handle, $Data);
 	 	fclose($Handle);
-
-	}
-
-	// 5.14
-	function	wpcorders_get_website_options() {
-
-		try {
-
-			// get the display name of user by email
-			$name_of_manager = get_user_by( 'email', get_option('admin_email') );
-			$name_of_manager = $name_of_manager->display_name;
-
-			// get the website options from wpcare
-			$wpcorders_remote_options = trim(@file_get_contents( wpcorders_support_url().'/api/v2/json/get-site-options.php?name='.urlencode($name_of_manager).'&sms_api='.get_option( 'wpcorders_sms_gateway_api' ) ));
-			$wpcorders_remote_options = json_decode($wpcorders_remote_options);
-
-			// exit this function if the return value of status is not 'success'
-		  if ($wpcorders_remote_options->status !== "success") {
-				wpcorders_write_log('A failed attempt to get the Website Options from WordPress Care API was made.');
-				return;
-			}
-
-			// update the nicename only if the server returns a value
-		  if (strlen($wpcorders_remote_options->nicename) > 0) update_option( 'wpcorders_manager_nicename', $wpcorders_remote_options->nicename, 'yes' );
-
-			// update the sms credits only if the server returns a value
-			//if (strlen($wpcorders_remote_options->sms_credits) > 0) update_option( 'wpcorders_sms_credits', $wpcorders_remote_options->sms_credits, 'yes' );
-
-			// update the email only if the server returns a value
-			if (strlen($wpcorders_remote_options->wpcare_email) > 0) update_option( 'wpcorders_wpcare_admin_email', $wpcorders_remote_options->wpcare_email, 'yes' );
-
-		} catch (\Exception $e) {
-			// php error
-		}
-
-		// end the function
-		wpcorders_write_log('A succesfull attempt to get the Website Options from WordPress Care API was made.');
-		return;
 
 	}
 
