@@ -3,7 +3,7 @@
 Plugin Name: WPCARE: WooCommerce Pending Orders
 Plugin URI: https://wpcare.gr
 Description: Sends an e-mail alert when pending orders exist. The e-mail is sent to "admin_email" every morning after 5:00 am. You can change the e-mail from General Options. Just activate the plugin and it works.
-Version: 1.1.2
+Version: 1.1.3
 Author: WordPress Care
 Author URI: https://wpcare.gr
 License: GPL3
@@ -174,7 +174,7 @@ $email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&a
 				</style>
 				<div id="body" style="width: 600px; background-color:#ffffff; padding: 30px; margin: 30px; text-align: left;">
 
-				<p><img src="'.plugins_url( "images/email-logo.png", __FILE__ ).'" /></p>
+				<p><img src="'.plugins_url( "images/logo.png", __FILE__ ).'" /></p>
 
 					%content%
 
