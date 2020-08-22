@@ -3,7 +3,7 @@
 Plugin Name: WPCARE: WooCommerce Pending Orders
 Plugin URI: https://wpcare.gr
 Description: Sends morning e-mail alerts to the shop manager when there are pending orders. Useful feature to remember pending orders. Just activate the plugin and it works.
-Version: 1.1.4
+Version: 1.1.5
 Author: WordPress Care
 Author URI: https://wpcare.gr
 License: GPL3
@@ -245,6 +245,7 @@ $email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&a
 				if ( !$complete_order ) return;
 				$order = new WC_Order($complete_order);
 				$order->update_status( 'completed' );
+				$order->save();
 				wpcorders_write_log('An order was set to status Complete by click on Pending WooCommerce Orders Email.', 'woocommerce');
 			}
 
@@ -255,6 +256,7 @@ $email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&a
 				if ( !$cancel_order ) return;
 				$order = new WC_Order($cancel_order);
 				$order->update_status( 'cancelled' );
+				$order->save();
 				wpcorders_write_log('An order was set to status Cancelled by click on Pending WooCommerce Orders Email.', 'woocommerce');
 			}
 		}
