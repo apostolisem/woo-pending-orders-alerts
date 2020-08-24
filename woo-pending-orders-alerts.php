@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: WPCARE: WooCommerce Pending Orders
+Plugin Name: WooCommerce Pending Orders Alerts
 Plugin URI: https://wpcare.gr
-Description: Sends morning e-mail alerts to the shop manager when there are pending orders. Useful feature to remember pending orders. Just activate the plugin and it works.
-Version: 1.1.5
+Description: Sends morning e-mail alerts to the shop manager when there are pending orders. Useful feature to remember pending orders.
+Version: 1.2.0
 Author: WordPress Care
 Author URI: https://wpcare.gr
 License: GPL3
@@ -12,6 +12,7 @@ Text Domain: woo-pending-orders-alerts
 */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // exit if accessed directly
+include_once('settings.php'); // include settings
 
 /*
 	// mark: TABLE OF CONTENTS
@@ -39,23 +40,25 @@ if ( ! defined( 'ABSPATH' ) ) exit; // exit if accessed directly
 
 // mark: 1. HOOKS
 
-	// 1.6
+	// 1.1
 	if ( ! wp_next_scheduled( 'wpcorders_woo_pending_orders' ) ) {
-		wp_schedule_event( strtotime('05:00:00'), 'daily', 'wpcorders_woo_pending_orders' );
+		$time_to_schedule = wpsf_get_setting( 'wpoa_settings_general', 'general', 'time' );
+		wp_schedule_event( strtotime($time_to_schedule), 'daily', 'wpcorders_woo_pending_orders' );
 	}
 
+	// 1.2
 	add_action( 'wpcorders_woo_pending_orders', 'wpcorders_woo_pending_orders' );
 
-	// 1.7
+	// 1.3
 	add_action('init', 'wpcorders_set_woo_order_status');
 
-	// 1.8
+	// 1.4
 	register_deactivation_hook(__FILE__, 'wpcorders_deactivation_hook');
 
-	// 1.9
+	// 1.5
 	add_action('admin_init', 'wpcorders_register_options');
 
-	// 1.13
+	// 1.6
 	register_activation_hook( __FILE__, 'wpcorders_activation_hook' );
 
 
