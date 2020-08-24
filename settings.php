@@ -36,7 +36,7 @@ class WPSFsettings {
 			'parent_slug' => 'woocommerce',
 			'page_title'  => __( 'WooCommerce Pending Orders Alerts', 'woo-pending-orders-alerts' ),
 			'menu_title'  => __( 'Pending Orders Alerts', 'woo-pending-orders-alerts' ),
-			'capability'  => 'manage_woocommerce',
+			'capability'  => 'activate_plugins',
 		) );
 	}
 

@@ -8,7 +8,11 @@ add_filter( 'wpsf_register_settings_wpoa_settings_general', 'wpoa_general_settin
  */
 function wpoa_general_settings( $wpsf_settings ) {
 
-	$email_template = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+	// set the default values here
+	global $default_settings;
+	$default_settings['wpcorders_scheduled_time'] = '05:00';
+	$default_settings['wpcorders_newsletter_logo'] = plugins_url( "images/logo.png", dirname(__FILE__) );
+	$default_settings['wpcorders_email_template'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
 		<html>
 		<head>
 			<meta http-equiv="Content-Type" content="text/html;UTF-8">
@@ -37,11 +41,11 @@ function wpoa_general_settings( $wpsf_settings ) {
 		'section_order'       => 5,
 		'fields'              => array(
 			array(
-				'id'         => 'time',
-				'title'      => 'Scheduled Time',
-				'desc'       => 'Current server time: N/A',
+				'id'         => 'wpcorders_scheduled_time',
+				'title'      => 'Scheduled Time (UTC)',
+				'desc'       => 'Current UTC time: ' . gmdate('H:m'),
 				'type'       => 'time',
-				'default'    => '05:00',
+				'default'    => $default_settings['wpcorders_scheduled_time'],
 				'timepicker' => array(), // Array of timepicker options (http://fgelinas.com/code/timepicker)
 			),
 			array(
@@ -50,14 +54,14 @@ function wpoa_general_settings( $wpsf_settings ) {
 				'desc'        => 'Change the e-mail template according to your needs.',
 				'placeholder' => 'This is a placeholder.',
 				'type'        => 'textarea',
-				'default'     => $email_template,
+				'default'     => $default_settings['wpcorders_email_template'],
 			),		
 			array(
 				'id'      => 'wpcorders_newsletter_logo',
 				'title'   => 'E-mail Alert Logo',
 				'desc'    => 'Choose a Logo image for the header of the alert message.',
 				'type'    => 'file',
-				'default' => plugins_url( "images/logo.png", __FILE__ ),
+				'default' => $default_settings['wpcorders_newsletter_logo'],
 			)
 		)
 	);

@@ -4,7 +4,7 @@ Plugin Name: WooCommerce Pending Orders Alerts
 Plugin URI: https://wpcare.gr
 Description: Sends morning e-mail alerts to the shop manager when there are pending orders. Useful feature to remember pending orders.
 Version: 1.2.0
-Author: WordPress Care
+Author: WPCARE
 Author URI: https://wpcare.gr
 License: GPL3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -42,7 +42,7 @@ include_once('settings.php'); // include settings
 
 	// 1.1
 	if ( ! wp_next_scheduled( 'wpcorders_woo_pending_orders' ) ) {
-		$time_to_schedule = wpsf_get_setting( 'wpoa_settings_general', 'general', 'time' );
+		$time_to_schedule = get_wpoa_setting( 'wpcorders_scheduled_time' );
 		wp_schedule_event( strtotime($time_to_schedule), 'daily', 'wpcorders_woo_pending_orders' );
 	}
 
@@ -56,14 +56,10 @@ include_once('settings.php'); // include settings
 	register_deactivation_hook(__FILE__, 'wpcorders_deactivation_hook');
 
 	// 1.5
-	add_action('admin_init', 'wpcorders_register_options');
-
-	// 1.6
 	register_activation_hook( __FILE__, 'wpcorders_activation_hook' );
 
 
 // mark: 2. SHORTCODES
-
 
 
 // mark: 3. FILTERS
@@ -74,11 +70,8 @@ include_once('settings.php'); // include settings
 
 // mark: 5. ACTIONS
 
-	// 5.5
+	// 5.1
 	function wpcorders_woo_pending_orders() {
-
-		// check if function is enabled at plugin options
-		if (get_option( 'wpcorders_woo_pending_orders' ) !== "on") return;
 
 		// check if woocommerce exists and it's enabled
 		if ( !in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) return;
@@ -132,7 +125,7 @@ include_once('settings.php'); // include settings
 				$email_message .= "<td style='padding:7px;'>".$order_id."</td>";
 				$email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&action=edit' style='text-decoration:none; color: blue;' target='_blank'>".$client_name ."</a></td>";
 				$email_message .= "<td>".date("d-m-Y",strtotime($order->get_date_created()))."</td>";
-$email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&action=edit&complete_order=".$order_id."&message=1' target='_blank'><img src='".$complete_order_button."' ".$button_style." /></a> <a href='".get_admin_url()."post.php?post=".$order_id."&action=edit&cancel_order=".$order_id."&message=1' target='_blank'><img src='".$cancel_order_button."' ".$button_style." /></a> <a href='".get_admin_url()."post.php?post=".$order_id."&action=edit' target='_blank'><img src='".$order_info_button."' ".$button_style." /></a></td>";
+				$email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&action=edit&complete_order=".$order_id."&message=1' target='_blank'><img src='".$complete_order_button."' ".$button_style." /></a> <a href='".get_admin_url()."post.php?post=".$order_id."&action=edit&cancel_order=".$order_id."&message=1' target='_blank'><img src='".$cancel_order_button."' ".$button_style." /></a> <a href='".get_admin_url()."post.php?post=".$order_id."&action=edit' target='_blank'><img src='".$order_info_button."' ".$button_style." /></a></td>";
 				$email_message .= "</tr>";
 			}
 		}
@@ -147,56 +140,27 @@ $email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&a
 
 	}
 
-	// 5.6
+	// 5.2
 	function wpcorders_deactivation_hook() {
 		wp_clear_scheduled_hook('wpcorders_woo_pending_orders');
 		wpcorders_write_log('The WordPress Care Plugin was succesfully Deactivated.');
 	}
 
-	// 5.9
+	// 5.3
 	function wpcorders_activation_hook() {
 		// check if version of wp is updated
 		if ( version_compare( get_bloginfo( 'version' ), '4.9.7', '<' ) )  {
 			wpcorders_write_log('The WordPress Care Plugin was NOT activated because the version of WordPress is old. An update to the latest version is required.');
 			wp_die("You must update WordPress to use this plugin!");
+		// check if woocommerce is enabled
 		} elseif (!wpcorders_woo_enabled()) {
 			wpcorders_write_log('The WordPress Care Plugin was NOT activated because WooCommerce is not Activated.');
 			wp_die("You must activate WooCommerce to use this plugin!");
-		} elseif (!get_option('wpcorders_first_time_installed')) {
-
-			$email_template = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-			<html>
-			<head>
-				<meta http-equiv="Content-Type" content="text/html;UTF-8">
-			</head>
-			<body style="background: #efefef; font: 13px \'Lucida Grande\', \'Lucida Sans Unicode\', Tahoma, Verdana, sans-serif; padding: 5px 0 10px" bgcolor="#efefef">
-				<style type="text/css">
-				body {
-					font: 13px "Lucida Grande", "Lucida Sans Unicode", Tahoma, Verdana, sans-serif; background-color: #efefef; padding: 5px 0 10px 0;
-				}
-				</style>
-				<div id="body" style="width: 600px; background-color:#ffffff; padding: 30px; margin: 30px; text-align: left;">
-
-				<p><img src="'.plugins_url( "images/logo.png", __FILE__ ).'" /></p>
-
-					%content%
-
-				</div>
-			</body>
-			</html>';
-
-			// create the default option values if it's the first time the plugin is installed
-			update_option( 'wpcorders_first_time_installed', 'no', '', 'yes' );
-			// insert default values
-			update_option( 'wpcorders_woo_pending_orders', 'on', '', 'yes' );
-			update_option( 'wpcorders_email_template', $email_template, '', 'yes' );
-			update_option( 'wpcorders_newsletter_logo', '', '', 'yes' );
-
-		}
+		} 
 		wpcorders_write_log('The WordPress Care Plugin was succesfully Activated.');
 	}
 
-	// 5.10
+	// 5.4
 	function wpcorders_write_log( $log, $function='' ) {
 
 		$upload_dir = wp_upload_dir();
@@ -221,14 +185,14 @@ $email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&a
 
 // mark: 6. HELPERS
 
-	// 6.2
+	// 6.1
 	function wpcorders_support_url() {
 
 		return 'http://wpcare.gr';
 
 	}
 
-	// 6.3
+	// 6.2
 	function wpcorders_woo_enabled() {
 		if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
 			return true;
@@ -237,10 +201,10 @@ $email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&a
 		}
 	}
 
-	// 6.4
+	// 6.3
 	function wpcorders_set_woo_order_status(){
 
-		if (!empty($_GET['complete_order']) OR !empty($_GET['cancel_order'])) {
+		if (!empty($_GET['complete_order'])) {
 			//things to do if order is set as complete
 			$complete_order = $_GET['complete_order'];
 			if (!empty($complete_order)) {
@@ -251,7 +215,7 @@ $email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&a
 				$order->save();
 				wpcorders_write_log('An order was set to status Complete by click on Pending WooCommerce Orders Email.', 'woocommerce');
 			}
-
+		} else if (!empty($_GET['cancel_order'])) {
 			//things to do if order is set as cancelled
 			$cancel_order = $_GET['cancel_order'];
 			if (!empty($cancel_order)) {
@@ -265,77 +229,13 @@ $email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&a
 		}
 	}
 
-	// 6.5
-	function wpcorders_get_option( $option_name ) {
-
-		// setup return variable
-		$option_value = '';
-
-		try {
-
-			// get the requested option
-			switch( $option_name ) {
-
-				case 'wpcorders_woo_pending_orders':
-				// wpcorders_woo_pending_orders
-				$option_value = get_option('wpcorders_woo_pending_orders');
-				break;
-				case 'wpcorders_email_template':
-				// wpcorders_email_template
-				$option_value = get_option('wpcorders_email_template');
-				break;
-				case 'wpcorders_newsletter_logo':
-				// wpcorders_newsletter_logo
-				$option_value = get_option('wpcorders_newsletter_logo');
-				break;
-
-			}
-
-		} catch( Exception $e) {
-
-			// php error
-
-		}
-
-		// return option value or it's default
-		return $option_value;
-
-	}
-
-	// 6.6
-	function wpcorders_get_current_options() {
-
-		// setup our return variable
-		$current_options = array();
-
-		try {
-
-			// build our current options associative array
-			$current_options = array(
-				'wpcorders_woo_pending_orders' => wpcorders_get_option('wpcorders_woo_pending_orders'),
-				'wpcorders_email_template' => wpcorders_get_option('wpcorders_email_template'),
-				'wpcorders_newsletter_logo' => wpcorders_get_option('wpcorders_newsletter_logo'),
-			);
-
-		} catch( Exception $e ) {
-
-			// php error
-
-		}
-
-		// return current options
-		return $current_options;
-
-	}
-
-	// 6.8
+	// 6.4
 	function wpcorders_wp_mail( $to, $subject, $message, $tpl=true, $nl2br=true ) {
 
 		$headers  = "From: \"".get_bloginfo('name')."\" <no-reply@".str_replace("www.", "", $_SERVER['SERVER_NAME']).">\r\n";
 		$headers .= "Reply-To: ".get_option('admin_email')."\r\n";
 		$headers .= "MIME-Version: 1.0\r\n";
 		$headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-		$logo_url = plugins_url( 'images/email-logo.png', __FILE__ );
 
 		if ($nl2br == true ) $message = nl2br($message);
 
@@ -343,8 +243,11 @@ $email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&a
 		$message_html = $message;
 
 		if ($tpl == true ) {
-			$message_html = get_option( 'wpcorders_email_template');
-			$message_html = str_replace("%content%",$message, $message_html);
+			// $message_html = get_option( 'wpcorders_email_template');
+			$message_html = get_wpoa_setting( 'wpcorders_email_template' );
+			$logo_url = get_wpoa_setting( 'wpcorders_newsletter_logo' );
+			$message_html = str_replace("%alert_logo%", $logo_url, $message_html);
+			$message_html = str_replace("%content%", $message, $message_html);
 		}
 
 		wp_mail($to, $subject, $message_html, $headers);
@@ -360,14 +263,13 @@ $email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&a
 // mark: 9. SETTINGS
 
 	// 9.1
-	function wpcorders_register_options() {
-		// plugin functions
-		register_setting('wpcorders_plugin_functions', 'wpcorders_woo_pending_orders');
-		// plugin options
-		register_setting('wpcorders_plugin_options', 'wpcorders_email_template');
-		register_setting('wpcorders_plugin_options', 'wpcorders_newsletter_logo');
+	function get_wpoa_setting( $setting_key ) {
+		$result = wpsf_get_setting( 'wpoa_settings_general', 'general', $setting_key );
+		if ( strlen($result) <= 0) { // if settings are not saved yet in database, get default values
+			global $default_settings;
+			$result = $default_settings[$setting_key];
+		}
+		return $result;
 	}
-
-
 
 // mark: 10. MISCELLANEOUS
