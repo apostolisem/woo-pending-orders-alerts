@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce Pending Orders Alerts
 Plugin URI: https://wpcare.gr
 Description: Sends morning e-mail alerts to the shop manager when there are pending orders. Useful feature to remember pending orders.
-Version: 1.2.0
+Version: 1.2.1
 Author: WPCARE
 Author URI: https://wpcare.gr
 License: GPL3
@@ -50,7 +50,7 @@ include_once('settings.php'); // include settings
 	add_action( 'wpcorders_woo_pending_orders', 'wpcorders_woo_pending_orders' );
 
 	// 1.3
-	add_action('init', 'wpcorders_set_woo_order_status');
+	add_action('init', 'wpcorders_set_woo_order_status', 99);
 
 	// 1.4
 	register_deactivation_hook(__FILE__, 'wpcorders_deactivation_hook');
