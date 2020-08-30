@@ -1,10 +1,12 @@
 <?php
 
-
 add_filter( 'wpsf_register_settings_wpoa_settings_general', 'wpoa_general_settings' );
 
 /**
- * Tabless example
+ * Populate General Settings
+ *
+ * @param  array $wpsf_settings
+ * @return array
  */
 function wpoa_general_settings( $wpsf_settings ) {
 
@@ -67,4 +69,19 @@ function wpoa_general_settings( $wpsf_settings ) {
 	);
 
 	return $wpsf_settings;
+}
+
+/**
+ * Retrieve settings from DB or if not there get the default values.
+ *
+ * @param  string $setting_key
+ * @return mixed
+ */
+function get_wpoa_setting( $setting_key ) {
+	$result = wpsf_get_setting( 'wpoa_settings_general', 'general', $setting_key );
+	if ( strlen($result) <= 0) { // if settings are not saved yet in database, get default values
+		global $default_settings;
+		$result = $default_settings[$setting_key];
+	}
+	return $result;
 }

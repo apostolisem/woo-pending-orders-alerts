@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: WooCommerce Pending Orders Alerts
+Plugin Name: WooCommerce Pending Orders
 Plugin URI: https://wpcare.gr
-Description: Sends morning e-mail alerts to the shop manager when there are pending orders. Useful feature to remember pending orders.
-Version: 1.2.1
+Description: Sends morning e-mail alerts to the shop manager when there are pending orders. Useful feature to get daily a fresh list of pending orders.
+Version: 1.2.2
 Author: WPCARE
 Author URI: https://wpcare.gr
 License: GPL3
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // exit if accessed directly
 include_once('settings.php'); // include settings
 
 /*
-	// mark: TABLE OF CONTENTS
+	* TABLE OF CONTENTS
 
 	1. HOOKS
 
@@ -33,12 +33,10 @@ include_once('settings.php'); // include settings
 
 	8. ADMIN PAGES
 
-	9. SETTINGS
-
-	10. MISCELLANEOUS
+	9. MISCELLANEOUS
 */
 
-// mark: 1. HOOKS
+// 1. HOOKS
 
 	// 1.1
 	if ( ! wp_next_scheduled( 'wpcorders_woo_pending_orders' ) ) {
@@ -59,18 +57,22 @@ include_once('settings.php'); // include settings
 	register_activation_hook( __FILE__, 'wpcorders_activation_hook' );
 
 
-// mark: 2. SHORTCODES
+// 2. SHORTCODES
 
 
-// mark: 3. FILTERS
+// 3. FILTERS
 
 
-// mark: 4. EXTERNAL SCRIPTS
+// 4. EXTERNAL SCRIPTS
 
 
-// mark: 5. ACTIONS
+// 5. ACTIONS
 
-	// 5.1
+	/**
+	 * Generate the e-mail alert and pass it wo wpcorders_wp_mail() function.
+	 *
+	 * @return void
+	 */
 	function wpcorders_woo_pending_orders() {
 
 		// check if woocommerce exists and it's enabled
@@ -83,8 +85,8 @@ include_once('settings.php'); // include settings
 
 		$args = array(
 			'post_type' => 'shop_order',
+			// post_status not used any more -> https://woocommerce.wordpress.com/2014/08/07/wc-2-2-order-statuses-plugin-compatibility/
 			//'post_status' => 'publish'
-			// not used any more like this -> https://woocommerce.wordpress.com/2014/08/07/wc-2-2-order-statuses-plugin-compatibility/
 			'post_status' => array_keys( wc_get_order_statuses() ),
 			'meta_key' => '_customer_user',
 			'posts_per_page' => '-1'
@@ -93,14 +95,10 @@ include_once('settings.php'); // include settings
 
 		$customer_orders = $my_query->posts;
 		$wpcorders_woo_pending_orders = 0;
-		$subject = "Υπάρχουν παραγγελίες σε εκκρεμότητα";
-		//$email_to = get_option('admin_email');
+		$subject = "Εκκρεμείς Παραγγελίες";
 		//https://stackoverflow.com/questions/57612532/how-to-get-email-recipients-from-new-order-email-in-woocommerce
 		$email_to = WC()->mailer()->get_emails()['WC_Email_New_Order']->recipient;
-		//$name_of_user_nice = get_option( 'wpcorders_manager_nicename' );
 		$orders_included = "";
-
-		//$email_message  = "Γεια σου ".$name_of_user_nice.",
 		$email_message  = "Γεια σου,
 
 		Αυτή είναι μια υπενθύμιση για τις ανοικτές παραγγελίες του καταστήματος σου:
@@ -140,13 +138,21 @@ include_once('settings.php'); // include settings
 
 	}
 
-	// 5.2
+	/**
+	 * When plugin is deactivated.
+	 *
+	 * @return void
+	 */
 	function wpcorders_deactivation_hook() {
 		wp_clear_scheduled_hook('wpcorders_woo_pending_orders');
 		wpcorders_write_log('The WordPress Care Plugin was succesfully Deactivated.');
 	}
 
-	// 5.3
+	/**
+	 * When plugin is activated.
+	 *
+	 * @return void
+	 */
 	function wpcorders_activation_hook() {
 		// check if version of wp is updated
 		if ( version_compare( get_bloginfo( 'version' ), '4.9.7', '<' ) )  {
@@ -159,8 +165,14 @@ include_once('settings.php'); // include settings
 		} 
 		wpcorders_write_log('The WordPress Care Plugin was succesfully Activated.');
 	}
-
-	// 5.4
+	
+	/**
+	 * Write in log file.
+	 *
+	 * @param  string $log
+	 * @param  string $function
+	 * @return void
+	 */
 	function wpcorders_write_log( $log, $function='' ) {
 
 		$upload_dir = wp_upload_dir();
@@ -183,16 +195,24 @@ include_once('settings.php'); // include settings
 	}
 
 
-// mark: 6. HELPERS
+// 6. HELPERS
 
-	// 6.1
+	/**
+	 * Set the WPCARE website url.
+	 *
+	 * @return string
+	 */
 	function wpcorders_support_url() {
 
 		return 'http://wpcare.gr';
 
 	}
 
-	// 6.2
+	/**
+	 * Check if WooCommerce is installed and active.
+	 *
+	 * @return bool
+	 */
 	function wpcorders_woo_enabled() {
 		if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
 			return true;
@@ -201,7 +221,11 @@ include_once('settings.php'); // include settings
 		}
 	}
 
-	// 6.3
+	/**
+	 * Set the order status based on URL GET variable.
+	 *
+	 * @return void
+	 */
 	function wpcorders_set_woo_order_status(){
 
 		if (!empty($_GET['complete_order'])) {
@@ -212,7 +236,6 @@ include_once('settings.php'); // include settings
 				if ( !$complete_order ) return;
 				$order = new WC_Order($complete_order);
 				$order->update_status( 'completed' );
-				$order->save();
 				wpcorders_write_log('An order was set to status Complete by click on Pending WooCommerce Orders Email.', 'woocommerce');
 			}
 		} else if (!empty($_GET['cancel_order'])) {
@@ -223,13 +246,21 @@ include_once('settings.php'); // include settings
 				if ( !$cancel_order ) return;
 				$order = new WC_Order($cancel_order);
 				$order->update_status( 'cancelled' );
-				$order->save();
 				wpcorders_write_log('An order was set to status Cancelled by click on Pending WooCommerce Orders Email.', 'woocommerce');
 			}
 		}
 	}
-
-	// 6.4
+	
+	/**
+	 * Send the e-mail alert.
+	 *
+	 * @param  string $to
+	 * @param  string $subject
+	 * @param  string $message
+	 * @param  bool $tpl
+	 * @param  bool $nl2br
+	 * @return void
+	 */
 	function wpcorders_wp_mail( $to, $subject, $message, $tpl=true, $nl2br=true ) {
 
 		$headers  = "From: \"".get_bloginfo('name')."\" <no-reply@".str_replace("www.", "", $_SERVER['SERVER_NAME']).">\r\n";
@@ -254,22 +285,10 @@ include_once('settings.php'); // include settings
 
 	}
 
-// mark: 7. CUSTOM POST TYPES
+// 7. CUSTOM POST TYPES
 
 
-// mark: 8. ADMIN PAGES
+// 8. ADMIN PAGES
 
 
-// mark: 9. SETTINGS
-
-	// 9.1
-	function get_wpoa_setting( $setting_key ) {
-		$result = wpsf_get_setting( 'wpoa_settings_general', 'general', $setting_key );
-		if ( strlen($result) <= 0) { // if settings are not saved yet in database, get default values
-			global $default_settings;
-			$result = $default_settings[$setting_key];
-		}
-		return $result;
-	}
-
-// mark: 10. MISCELLANEOUS
+// 9. MISCELLANEOUS
