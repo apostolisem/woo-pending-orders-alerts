@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce Pending Orders
 Plugin URI: https://wpcare.gr
 Description: Sends morning e-mail alerts to the shop manager when there are pending orders. Useful feature to get daily a fresh list of pending orders.
-Version: 1.2.3
+Version: 1.2.4
 Author: wpCare
 Author URI: https://wpcare.gr
 License: GPL3
@@ -118,12 +118,16 @@ include_once('settings.php'); // include settings
 			} else {
 				$wpcorders_woo_pending_orders++;
 				$orders_included .= $order_id.", ";
-				$email_message .= "<tr>";
+				$email_message .= "\r\n<tr>";
 				$email_message .= "<td style='padding:7px;'>".$order_id."</td>";
 				$email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&action=edit' style='text-decoration:none; color: blue;' target='_blank'>".$client_name ."</a></td>";
 				$email_message .= "<td>".date("d-m-Y",strtotime($order->get_date_created()))."</td>";
-				$email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&action=edit&complete_order=".$order_id."&message=1' target='_blank'><img src='".$complete_order_button."' ".$button_style." /></a> <a href='".get_admin_url()."post.php?post=".$order_id."&action=edit&cancel_order=".$order_id."&message=1' target='_blank'><img src='".$cancel_order_button."' ".$button_style." /></a> <a href='".get_admin_url()."post.php?post=".$order_id."&action=edit' target='_blank'><img src='".$order_info_button."' ".$button_style." /></a></td>";
-				$email_message .= "</tr>\r\n";
+				$email_message .= "<td>\r\n
+				<a href='".get_admin_url()."post.php?post=".$order_id."&action=edit&complete_order=".$order_id."&message=1' target='_blank'><img src='".$complete_order_button."' ".$button_style." /></a>\r\n
+				<a href='".get_admin_url()."post.php?post=".$order_id."&action=edit&cancel_order=".$order_id."&message=1' target='_blank'><img src='".$cancel_order_button."' ".$button_style." /></a>\r\n
+				<a href='".get_admin_url()."post.php?post=".$order_id."&action=edit' target='_blank'><img src='".$order_info_button."' ".$button_style." /></a>\r\n
+				</td>";
+				$email_message .= "</tr>";
 				$orders_count++;
 			}
 		if ($orders_count == 10) { break; } // exit foreach when 10 orders reached
