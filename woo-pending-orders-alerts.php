@@ -3,8 +3,8 @@
 Plugin Name: WooCommerce Pending Orders
 Plugin URI: https://wpcare.gr
 Description: Sends morning e-mail alerts to the shop manager when there are pending orders. Useful feature to get daily a fresh list of pending orders.
-Version: 1.2.2
-Author: WPCARE
+Version: 1.2.3
+Author: wpCare
 Author URI: https://wpcare.gr
 License: GPL3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -95,14 +95,13 @@ include_once('settings.php'); // include settings
 
 		$customer_orders = $my_query->posts;
 		$wpcorders_woo_pending_orders = 0;
-		$subject = "Εκκρεμείς Παραγγελίες";
+		$subject = "Ανοιχτές παραγγελίες στο " . get_bloginfo();
 		//https://stackoverflow.com/questions/57612532/how-to-get-email-recipients-from-new-order-email-in-woocommerce
 		$email_to = WC()->mailer()->get_emails()['WC_Email_New_Order']->recipient;
 		$orders_included = "";
-		$email_message  = "Γεια σου,
-
-		Αυτή είναι μια υπενθύμιση για τις ανοικτές παραγγελίες του καταστήματος σου:
-
+		$orders_count = 0;
+		$email_message  = "Αγαπητέ Shop Manager,<br /><br />
+		Αυτή είναι μια λίστα με τις τελευταίες ανοικτές παραγγελίες του καταστήματος σου:<br /><br />
 		<table width='100%' style='border-collapse: collapse; background-color: #F7F7F7;'><tr><th width='10%' style='padding:7px;'>#</th><th width='60%'>Πελάτης</th><th width='15%'>Ημερομηνία</th><th width='15%'>Επιλογές</th></tr>";
 
 		foreach ($customer_orders as $customer_order) {
@@ -124,12 +123,17 @@ include_once('settings.php'); // include settings
 				$email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&action=edit' style='text-decoration:none; color: blue;' target='_blank'>".$client_name ."</a></td>";
 				$email_message .= "<td>".date("d-m-Y",strtotime($order->get_date_created()))."</td>";
 				$email_message .= "<td><a href='".get_admin_url()."post.php?post=".$order_id."&action=edit&complete_order=".$order_id."&message=1' target='_blank'><img src='".$complete_order_button."' ".$button_style." /></a> <a href='".get_admin_url()."post.php?post=".$order_id."&action=edit&cancel_order=".$order_id."&message=1' target='_blank'><img src='".$cancel_order_button."' ".$button_style." /></a> <a href='".get_admin_url()."post.php?post=".$order_id."&action=edit' target='_blank'><img src='".$order_info_button."' ".$button_style." /></a></td>";
-				$email_message .= "</tr>";
+				$email_message .= "</tr>\r\n";
+				$orders_count++;
 			}
+		if ($orders_count == 10) { break; } // exit foreach when 10 orders reached
 		}
-		$email_message .= "</table><br />";
-		$email_message .= "<b><i>Επεξήγηση Επιλογών</i></b>:<ul style='list-style: none;'><li><span style='color:green;'><img src='".$complete_order_button."' ".$button_style." /> ολοκλήρωση</span> αν η παραγγελία έχει αποσταλλεί</li><li><span style='color:red;'><img src='".$cancel_order_button."' ".$button_style." /> ακύρωση</span> αν η παραγγελία ακυρώθηκε</li><li><span style='color:blue;'><img src='".$order_info_button."' ".$button_style." /> άνοιγμα</span> για προβολή ή επεξεργασία της παραγγελίας</li></ul>
-		Θα χρειαστεί να συνδεθείς με το username και τον κωδικό σου για να πραγματοποιήσεις αλλαγές.\r\n\r\nΜε εκτίμηση,\r\nΗ ιστοσελίδα ".get_bloginfo()."!";
+		$email_message .= "</table><br />";		
+		$email_message .= "Για να δείς όλες τις παραγγελίες του καταστήματος κάνε <a href='".get_admin_url()."edit.php?post_type=shop_order'>κλικ εδώ</a>.<br /><br />
+		<b><i>Επεξήγηση Επιλογών</i></b>:<ul style='list-style: none;'><li><span style='color:green;'><img src='".$complete_order_button."' ".$button_style." /> ολοκλήρωση</span> αν η παραγγελία έχει αποσταλλεί</li><li><span style='color:red;'><img src='".$cancel_order_button."' ".$button_style." /> ακύρωση</span> αν η παραγγελία ακυρώθηκε</li><li><span style='color:blue;'><img src='".$order_info_button."' ".$button_style." /> άνοιγμα</span> για προβολή ή επεξεργασία της παραγγελίας</li></ul>
+		Θα χρειαστεί να συνδεθείς με το username και τον κωδικό σου για να πραγματοποιήσεις αλλαγές.<br /><br />
+		Με εκτίμηση,<br />
+		Η ιστοσελίδα ".get_bloginfo()."!";
 
 		if ($wpcorders_woo_pending_orders > 0) {
 			wpcorders_wp_mail($email_to,$subject,$email_message);
@@ -261,7 +265,7 @@ include_once('settings.php'); // include settings
 	 * @param  bool $nl2br
 	 * @return void
 	 */
-	function wpcorders_wp_mail( $to, $subject, $message, $tpl=true, $nl2br=true ) {
+	function wpcorders_wp_mail( $to, $subject, $message, $tpl=true, $nl2br=false ) {
 
 		$headers  = "From: \"".get_bloginfo('name')."\" <no-reply@".str_replace("www.", "", $_SERVER['SERVER_NAME']).">\r\n";
 		$headers .= "Reply-To: ".get_option('admin_email')."\r\n";
