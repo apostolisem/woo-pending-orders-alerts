@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce Pending Orders
 Plugin URI: https://wpcare.gr
 Description: Sends morning e-mail alerts to the shop manager when there are pending orders. Useful feature to get daily a fresh list of pending orders.
-Version: 1.2.5
+Version: 1.2.6
 Author: wpCare
 Author URI: https://wpcare.gr
 License: GPL3
@@ -101,7 +101,7 @@ include_once('settings.php'); // include settings
 		$orders_included = "";
 		$orders_count = 0;
 		$email_message  = "Αγαπητέ Shop Manager,<br /><br />
-		Αυτή είναι μια λίστα με τις τελευταίες ανοιχτές παραγγελίες του καταστήματος σου:<br /><br />
+		Ακολουθεί μια λίστα με τις τελευταίες παραγγελίες σε εκκρεμότητα του καταστήματος ".get_bloginfo().":<br /><br />
 		<table width='100%' style='border-collapse: collapse; background-color: #F7F7F7;'><tr><th width='10%' style='padding:7px;'>#</th><th width='60%'>Πελάτης</th><th width='15%'>Ημερομηνία</th><th width='15%'>Επιλογές</th></tr>";
 
 		foreach ($customer_orders as $customer_order) {
@@ -137,7 +137,7 @@ include_once('settings.php'); // include settings
 		<b><i>Επεξήγηση Επιλογών</i></b>:<ul style='list-style: none;'><li><span style='color:green;'><img src='".$complete_order_button."' ".$button_style." /> ολοκλήρωση</span> αν η παραγγελία έχει αποσταλλεί</li><li><span style='color:red;'><img src='".$cancel_order_button."' ".$button_style." /> ακύρωση</span> αν η παραγγελία ακυρώθηκε</li><li><span style='color:blue;'><img src='".$order_info_button."' ".$button_style." /> άνοιγμα</span> για προβολή ή επεξεργασία της παραγγελίας</li></ul>
 		Θα χρειαστεί να συνδεθείς με το username και τον κωδικό σου για να πραγματοποιήσεις αλλαγές.<br /><br />
 		Με εκτίμηση,<br />
-		Η ιστοσελίδα ".get_bloginfo()."!";
+		Η ομάδα του WPCARE!";
 
 		if ($wpcorders_woo_pending_orders > 0) {
 			wpcorders_wp_mail($email_to,$subject,$email_message);
