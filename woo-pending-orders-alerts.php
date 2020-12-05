@@ -3,8 +3,8 @@
 Plugin Name: WooCommerce Pending Orders
 Plugin URI: https://wpcare.gr
 Description: Sends morning e-mail alerts to the shop manager when there are pending orders. Useful feature to get daily a fresh list of pending orders.
-Version: 1.2.6
-Author: wpCare
+Version: 1.2.7
+Author: WPCARE
 Author URI: https://wpcare.gr
 License: GPL3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
